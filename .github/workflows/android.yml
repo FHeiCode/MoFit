@@ -23,7 +23,13 @@ jobs:
           java-version: 17
       - uses: gradle/actions/setup-gradle@v4
       - name: Build debug and run unit tests
-        run: ./gradlew assembleDebug testDebugUnitTest --stacktrace
+        run: |
+          set -o pipefail
+          ./gradlew assembleDebug testDebugUnitTest 2>&1 | tee build.log
+
+      - name: Report build errors
+        if: failure()
+        run: grep -E "^e: |What went wrong|FAILED|Exception" -A2 build.log | head -40 | while IFS= read -r l; do echo "::error::$l"; done
 
   # Every commit on main: signed release APK + GitHub Release.
   release:
@@ -62,7 +68,15 @@ jobs:
           SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
           SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
-        run: ./gradlew testReleaseUnitTest assembleRelease --stacktrace
+        run: |
+          set -o pipefail
+          ./gradlew testReleaseUnitTest assembleRelease 2>&1 | tee build.log
+
+      - name: Report build errors
+        if: failure()
+        run: |
+          [ -f build.log ] || exit 0
+          grep -E "^e: |What went wrong|FAILED|Exception" -A2 build.log | head -40 | while IFS= read -r l; do echo "::error::$l"; done
 
       - name: Verify APK signature and version
         run: |

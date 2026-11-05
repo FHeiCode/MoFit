@@ -1,6 +1,15 @@
 # MoFit
 
-Android app written in Kotlin with Jetpack Compose.
+Android app written in Kotlin with Jetpack Compose — ein Trainings-Tracker im dunklen Neon-Look.
+
+## Features
+
+- **Heute** – der Plan für den aktuellen Wochentag, Fortschrittsbalken, Sätze per Bottom-Sheet erfassen, Wochen-Streak
+- **Plan** – Wochenplan: welche Übung an welchem Tag, mit Sätzen, Wiederholungen und Gewicht
+- **Fortschritt** – pro Übung: Rekord, geschätztes 1RM, Diagramm (Gewicht / Wdh / Volumen) und Verlauf
+- **Übungen** – eigene Übungsarten mit Muskelgruppe, Emoji, Farbe und Körpergewicht-Option
+
+Daten liegen lokal als JSON-Datei im App-Speicher und bleiben bei Updates erhalten.
 
 ## Tech stack
 
