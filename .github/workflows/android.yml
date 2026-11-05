@@ -29,7 +29,8 @@ jobs:
 
       - name: Report build errors
         if: failure()
-        run: grep -E "^e: |What went wrong|FAILED|Exception" -A2 build.log | head -40 | while IFS= read -r l; do echo "::error::$l"; done
+        run: |
+          grep -E "^e: |What went wrong|FAILED|Exception" -A2 build.log | head -40 | while IFS= read -r l; do echo "::error::$l"; done
 
   # Every commit on main: signed release APK + GitHub Release.
   release:
