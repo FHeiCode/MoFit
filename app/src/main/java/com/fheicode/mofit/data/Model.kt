@@ -24,7 +24,6 @@ data class PlanItem(
     val dayOfWeek: Int,
     val exerciseId: String,
     val sets: Int,
-    val reps: Int,
     val weightKg: Double,
     val order: Int = 0,
 )

@@ -166,7 +166,6 @@ fun PlanItemDialog(
 ) {
     var exerciseId by remember { mutableStateOf(initial.exerciseId) }
     var sets by remember { mutableStateOf(initial.sets.toDouble()) }
-    var reps by remember { mutableStateOf(initial.reps.toDouble()) }
     var weight by remember { mutableStateOf(initial.weightKg) }
     val selected = exercises.find { it.id == exerciseId }
 
@@ -191,8 +190,6 @@ fun PlanItemDialog(
                 Spacer(Modifier.height(16.dp))
                 NumberStepper("Sätze", sets, { sets = it }, step = 1.0, unit = "", min = 1.0)
                 Spacer(Modifier.height(12.dp))
-                NumberStepper("Wiederholungen", reps, { reps = it }, step = 1.0, unit = "Wdh", min = 1.0)
-                Spacer(Modifier.height(12.dp))
                 NumberStepper(
                     if (selected?.bodyweight == true) "Zusatzgewicht" else "Gewicht",
                     weight, { weight = it },
@@ -204,7 +201,7 @@ fun PlanItemDialog(
             TextButton(
                 enabled = selected != null,
                 onClick = {
-                    onSave(initial.copy(exerciseId = exerciseId, sets = sets.toInt(), reps = reps.toInt(), weightKg = weight))
+                    onSave(initial.copy(exerciseId = exerciseId, sets = sets.toInt(), weightKg = weight))
                 },
             ) { Text("Speichern", color = MoFitColors.Lime) }
         },

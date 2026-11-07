@@ -19,8 +19,10 @@ fun parseDecimal(text: String): Double? = text.trim().replace(',', '.').toDouble
 fun setLabel(weightKg: Double, reps: Int): String =
     if (weightKg <= 0.0) "$reps Wdh" else "${formatKg(weightKg)} kg × $reps"
 
-fun planLabel(sets: Int, reps: Int, weightKg: Double): String =
-    if (weightKg <= 0.0) "$sets × $reps Wdh" else "$sets × $reps · ${formatKg(weightKg)} kg"
+fun planLabel(sets: Int, weightKg: Double): String {
+    val setsText = if (sets == 1) "1 Satz" else "$sets Sätze"
+    return if (weightKg <= 0.0) setsText else "$setsText · ${formatKg(weightKg)} kg"
+}
 
 private val longDate = DateTimeFormatter.ofPattern("EEEE, d. MMMM", Locale.GERMAN)
 private val historyDate = DateTimeFormatter.ofPattern("EE, dd.MM.yyyy", Locale.GERMAN)

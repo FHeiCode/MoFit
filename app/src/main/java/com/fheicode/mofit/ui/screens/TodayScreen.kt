@@ -182,7 +182,7 @@ fun TodayScreen(
                     Column(Modifier.weight(1f)) {
                         Text(exercise.name, style = MaterialTheme.typography.titleMedium)
                         Text(
-                            planLabel(item.sets, item.reps, item.weightKg),
+                            planLabel(item.sets, item.weightKg),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MoFitColors.TextSecondary,
                         )

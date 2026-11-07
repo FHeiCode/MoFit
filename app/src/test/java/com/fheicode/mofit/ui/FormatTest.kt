@@ -25,7 +25,8 @@ class FormatTest {
     fun labels() {
         assertEquals("40 kg × 10", setLabel(40.0, 10))
         assertEquals("12 Wdh", setLabel(0.0, 12))
-        assertEquals("3 × 10 · 32,5 kg", planLabel(3, 10, 32.5))
-        assertEquals("3 × 15 Wdh", planLabel(3, 15, 0.0))
+        assertEquals("3 Sätze · 32,5 kg", planLabel(3, 32.5))
+        assertEquals("3 Sätze", planLabel(3, 0.0))
+        assertEquals("1 Satz", planLabel(1, 0.0))
     }
 }

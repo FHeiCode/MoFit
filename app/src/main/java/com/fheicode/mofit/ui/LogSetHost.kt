@@ -12,8 +12,9 @@ import com.fheicode.mofit.ui.components.LogSetSheet
 data class LogRequest(val exerciseId: String, val weightKg: Double, val reps: Int)
 
 /**
- * Sensible starting values: the last set from today, otherwise the plan,
- * otherwise the last set ever, otherwise 10 reps without weight.
+ * Sensible starting values: the last set from today; otherwise the planned weight
+ * (the plan has no reps, so reps come from the last set ever, or 10); otherwise
+ * the last set ever; otherwise 10 reps without weight.
  */
 fun defaultLogRequest(data: AppData, exercise: Exercise, plan: PlanItem?, todayEpochDay: Long): LogRequest {
     val logs = data.logs.filter { it.exerciseId == exercise.id }
@@ -21,7 +22,7 @@ fun defaultLogRequest(data: AppData, exercise: Exercise, plan: PlanItem?, todayE
     val lastEver = logs.maxByOrNull { it.timestamp }
     return when {
         lastToday != null -> LogRequest(exercise.id, lastToday.weightKg, lastToday.reps)
-        plan != null -> LogRequest(exercise.id, plan.weightKg, plan.reps)
+        plan != null -> LogRequest(exercise.id, plan.weightKg, lastEver?.reps ?: 10)
         lastEver != null -> LogRequest(exercise.id, lastEver.weightKg, lastEver.reps)
         else -> LogRequest(exercise.id, 0.0, 10)
     }

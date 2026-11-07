@@ -13,15 +13,15 @@ object SampleData {
         val crunches = Exercise(name = "Crunches", muscleGroup = "Bauch", emoji = "⚡", colorIndex = 7, bodyweight = true)
 
         val plan = listOf(
-            PlanItem(dayOfWeek = 1, exerciseId = bench.id, sets = 3, reps = 10, weightKg = 30.0, order = 0),
-            PlanItem(dayOfWeek = 1, exerciseId = press.id, sets = 3, reps = 10, weightKg = 10.0, order = 1),
-            PlanItem(dayOfWeek = 1, exerciseId = pushup.id, sets = 3, reps = 15, weightKg = 0.0, order = 2),
-            PlanItem(dayOfWeek = 3, exerciseId = squat.id, sets = 3, reps = 10, weightKg = 30.0, order = 0),
-            PlanItem(dayOfWeek = 3, exerciseId = deadlift.id, sets = 3, reps = 8, weightKg = 40.0, order = 1),
-            PlanItem(dayOfWeek = 3, exerciseId = crunches.id, sets = 3, reps = 20, weightKg = 0.0, order = 2),
-            PlanItem(dayOfWeek = 5, exerciseId = pullup.id, sets = 3, reps = 6, weightKg = 0.0, order = 0),
-            PlanItem(dayOfWeek = 5, exerciseId = curls.id, sets = 3, reps = 12, weightKg = 8.0, order = 1),
-            PlanItem(dayOfWeek = 5, exerciseId = bench.id, sets = 3, reps = 8, weightKg = 32.5, order = 2),
+            PlanItem(dayOfWeek = 1, exerciseId = bench.id, sets = 3, weightKg = 30.0, order = 0),
+            PlanItem(dayOfWeek = 1, exerciseId = press.id, sets = 3, weightKg = 10.0, order = 1),
+            PlanItem(dayOfWeek = 1, exerciseId = pushup.id, sets = 3, weightKg = 0.0, order = 2),
+            PlanItem(dayOfWeek = 3, exerciseId = squat.id, sets = 3, weightKg = 30.0, order = 0),
+            PlanItem(dayOfWeek = 3, exerciseId = deadlift.id, sets = 3, weightKg = 40.0, order = 1),
+            PlanItem(dayOfWeek = 3, exerciseId = crunches.id, sets = 3, weightKg = 0.0, order = 2),
+            PlanItem(dayOfWeek = 5, exerciseId = pullup.id, sets = 3, weightKg = 0.0, order = 0),
+            PlanItem(dayOfWeek = 5, exerciseId = curls.id, sets = 3, weightKg = 8.0, order = 1),
+            PlanItem(dayOfWeek = 5, exerciseId = bench.id, sets = 3, weightKg = 32.5, order = 2),
         )
 
         return AppData(
