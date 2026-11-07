@@ -48,5 +48,21 @@ data class AppData(
     val logs: List<SetLog> = emptyList(),
 )
 
-val MUSCLE_GROUPS = listOf("Brust", "Rücken", "Beine", "Schultern", "Arme", "Bauch", "Ganzkörper", "Cardio")
+val MUSCLE_GROUPS = listOf("Brust", "Rücken", "Beine", "Schultern", "Bizeps", "Trizeps", "Unterarm", "Bauch", "Cardio")
+
+/**
+ * Older versions had a single "Arme" group. Map it to the new, finer groups by
+ * looking at the exercise name; anything unclear becomes "Bizeps" and can be changed.
+ */
+fun migrateMuscleGroup(exercise: Exercise): Exercise {
+    if (exercise.muscleGroup != "Arme") return exercise
+    val n = exercise.name.lowercase()
+    val group = when {
+        listOf("trizeps", "dips", "french", "pushdown", "kickback").any { it in n } -> "Trizeps"
+        listOf("unterarm", "handgelenk", "wrist", "grip", "griff").any { it in n } -> "Unterarm"
+        else -> "Bizeps"
+    }
+    return exercise.copy(muscleGroup = group)
+}
+
 val EXERCISE_EMOJIS = listOf("🏋️", "💪", "🦵", "🔥", "⚡", "🚀", "🧗", "🤸", "🏃", "🚴", "🥊", "🥇", "🦍", "🐺")

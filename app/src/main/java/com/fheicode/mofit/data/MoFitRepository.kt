@@ -37,7 +37,8 @@ class MoFitRepository(
     private fun load(): AppData {
         if (!file.exists()) return SampleData.create()
         return try {
-            json.decodeFromString(AppData.serializer(), file.readText())
+            val loaded = json.decodeFromString(AppData.serializer(), file.readText())
+            loaded.copy(exercises = loaded.exercises.map(::migrateMuscleGroup))
         } catch (e: Exception) {
             // Keep the unreadable file for inspection instead of silently losing it.
             file.copyTo(File(file.parentFile, "${file.name}.corrupt-${System.currentTimeMillis()}"), overwrite = true)

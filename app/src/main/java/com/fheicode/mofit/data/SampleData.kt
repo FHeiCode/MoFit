@@ -9,7 +9,7 @@ object SampleData {
         val pullup = Exercise(name = "Klimmzüge", muscleGroup = "Rücken", emoji = "🧗", colorIndex = 2, bodyweight = true)
         val pushup = Exercise(name = "Liegestütze", muscleGroup = "Brust", emoji = "💪", colorIndex = 4, bodyweight = true)
         val press = Exercise(name = "Schulterdrücken", muscleGroup = "Schultern", emoji = "🚀", colorIndex = 5)
-        val curls = Exercise(name = "Bizeps-Curls", muscleGroup = "Arme", emoji = "💪", colorIndex = 6)
+        val curls = Exercise(name = "Bizeps-Curls", muscleGroup = "Bizeps", emoji = "💪", colorIndex = 6)
         val crunches = Exercise(name = "Crunches", muscleGroup = "Bauch", emoji = "⚡", colorIndex = 7, bodyweight = true)
 
         val plan = listOf(

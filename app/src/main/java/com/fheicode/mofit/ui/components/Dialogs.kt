@@ -252,7 +252,10 @@ fun ExerciseDialog(
                 Text("MUSKELGRUPPE", style = MaterialTheme.typography.labelSmall, color = MoFitColors.TextSecondary)
                 Spacer(Modifier.height(6.dp))
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    items(MUSCLE_GROUPS) { g ->
+                    val groups = initial?.muscleGroup
+                        ?.takeIf { it !in MUSCLE_GROUPS }
+                        ?.let { MUSCLE_GROUPS + it } ?: MUSCLE_GROUPS
+                    items(groups) { g ->
                         FilterChip(selected = g == group, onClick = { group = g }, label = { Text(g) }, colors = chipColors())
                     }
                 }
