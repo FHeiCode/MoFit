@@ -103,6 +103,22 @@ class MoFitRepository(
         mutate { d -> d.copy(logs = d.logs + log) }
     }
 
+    /** Logs several sets at once (used by "Plan übernehmen"). */
+    fun logSets(entries: List<SetEntry>, date: LocalDate = LocalDate.now()) {
+        if (entries.isEmpty()) return
+        val now = System.currentTimeMillis()
+        val logs = entries.mapIndexed { i, e ->
+            SetLog(
+                exerciseId = e.exerciseId,
+                epochDay = date.toEpochDay(),
+                timestamp = now + i, // keeps the order stable
+                weightKg = e.weightKg,
+                reps = e.reps,
+            )
+        }
+        mutate { d -> d.copy(logs = d.logs + logs) }
+    }
+
     fun deleteLog(id: String) = mutate { d ->
         d.copy(logs = d.logs.filterNot { it.id == id })
     }

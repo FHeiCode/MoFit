@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.DoneAll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledIconButton
@@ -41,6 +42,8 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.unit.dp
 import com.fheicode.mofit.data.AppData
 import com.fheicode.mofit.data.MoFitRepository
+import com.fheicode.mofit.data.PlanAdoption
+import com.fheicode.mofit.data.PlanItem
 import com.fheicode.mofit.data.Stats
 import com.fheicode.mofit.ui.LogRequest
 import com.fheicode.mofit.ui.LogSetHost
@@ -86,6 +89,22 @@ fun TodayScreen(
 
     var logRequest by remember { mutableStateOf<LogRequest?>(null) }
     var picking by remember { mutableStateOf(false) }
+
+    // "Plan übernehmen": log all open sets with the planned weight in one tap.
+    fun adopt(items: List<PlanItem>) {
+        val entries = PlanAdoption.entriesFor(items, data.logs, todayEpoch)
+        if (entries.isEmpty()) return
+        repository.logSets(entries)
+        val names = entries.map { it.exerciseId }.distinct()
+        onMessage(
+            if (names.size == 1) {
+                val ex = exercisesById[names.first()]
+                "✅ ${ex?.name}: ${entries.size} ${if (entries.size == 1) "Satz" else "Sätze"} übernommen"
+            } else {
+                "✅ Plan übernommen: ${entries.size} Sätze 🔥"
+            }
+        )
+    }
 
     val greeting = when (LocalTime.now().hour) {
         in 5..10 -> "Guten Morgen ☀️"
@@ -143,6 +162,21 @@ fun TodayScreen(
                         gapSize = 0.dp,
                         drawStopIndicator = {},
                     )
+                    if (progress < 1f) {
+                        Spacer(Modifier.height(14.dp))
+                        Button(
+                            onClick = { adopt(planToday) },
+                            shape = RoundedCornerShape(16.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color.Black),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(50.dp),
+                        ) {
+                            Icon(Icons.Rounded.DoneAll, null)
+                            Spacer(Modifier.width(8.dp))
+                            Text(if (doneSets == 0) "Ganzen Plan übernehmen" else "Rest vom Plan übernehmen")
+                        }
+                    }
                 }
             }
         }
@@ -157,12 +191,14 @@ fun TodayScreen(
 
         if (planToday.isNotEmpty()) {
             item {
-                Text(
-                    "DEIN PLAN HEUTE",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MoFitColors.TextSecondary,
-                    modifier = Modifier.padding(top = 8.dp),
-                )
+                Column(Modifier.padding(top = 8.dp)) {
+                    Text("DEIN PLAN HEUTE", style = MaterialTheme.typography.labelSmall, color = MoFitColors.TextSecondary)
+                    Text(
+                        "✓ übernimmt die Planwerte · + für einen einzelnen Satz",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MoFitColors.TextSecondary.copy(alpha = 0.7f),
+                    )
+                }
             }
         }
 
@@ -187,15 +223,18 @@ fun TodayScreen(
                             color = MoFitColors.TextSecondary,
                         )
                     }
+                    IconButton(onClick = { logRequest = defaultLogRequest(data, exercise, item, todayEpoch) }) {
+                        Icon(Icons.Rounded.Add, contentDescription = "Einzelnen Satz eingeben", tint = MoFitColors.TextSecondary)
+                    }
                     FilledIconButton(
-                        onClick = { logRequest = defaultLogRequest(data, exercise, item, todayEpoch) },
+                        onClick = { if (!complete) adopt(listOf(item)) },
                         colors = IconButtonDefaults.filledIconButtonColors(
-                            containerColor = if (complete) MoFitColors.Lime else MoFitColors.SurfaceHigh,
+                            containerColor = if (complete) MoFitColors.Lime else MoFitColors.Lime.copy(alpha = 0.16f),
                             contentColor = if (complete) Color.Black else MoFitColors.Lime,
                         ),
                         modifier = Modifier.size(48.dp),
                     ) {
-                        Icon(if (complete) Icons.Rounded.Check else Icons.Rounded.Add, contentDescription = "Satz erfassen")
+                        Icon(Icons.Rounded.Check, contentDescription = if (complete) "Erledigt" else "Plan übernehmen")
                     }
                 }
                 Spacer(Modifier.height(12.dp))

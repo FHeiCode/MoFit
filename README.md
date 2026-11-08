@@ -4,7 +4,7 @@ Android app written in Kotlin with Jetpack Compose — ein Trainings-Tracker im 
 
 ## Features
 
-- **Heute** – der Plan für den aktuellen Wochentag, Fortschrittsbalken, Sätze per Bottom-Sheet erfassen, Wochen-Streak
+- **Heute** – der Plan für den aktuellen Wochentag, Fortschrittsbalken, Planwerte mit einem Tipp übernehmen (pro Übung oder ganzer Plan) oder einzelne Sätze erfassen, Wochen-Streak
 - **Plan** – Wochenplan: welche Übung an welchem Tag, mit Sätzen und Gewicht
 - **Fortschritt** – pro Übung: Rekord, geschätztes 1RM, Diagramm (Gewicht / Wdh / Volumen) und Verlauf
 - **Übungen** – eigene Übungsarten mit Muskelgruppe (Brust, Rücken, Beine, Schultern, Bizeps, Trizeps, Unterarm, Bauch, Cardio), Emoji, Farbe und Körpergewicht-Option
