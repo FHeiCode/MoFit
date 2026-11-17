@@ -93,6 +93,8 @@ fun LogSetSheet(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var weight by remember { mutableStateOf(initialWeight) }
     var reps by remember { mutableStateOf(initialReps.toDouble()) }
+    var weightOk by remember { mutableStateOf(true) }
+    var repsOk by remember { mutableStateOf(true) }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -134,6 +136,7 @@ fun LogSetSheet(
                 step = if (exercise.bodyweight) 5.0 else 2.5,
                 unit = "kg",
                 decimals = true,
+                onValidityChange = { weightOk = it },
             )
             Spacer(Modifier.height(16.dp))
             NumberStepper(
@@ -143,13 +146,14 @@ fun LogSetSheet(
                 step = 1.0,
                 unit = "Wdh",
                 min = 1.0,
+                onValidityChange = { repsOk = it },
             )
             Spacer(Modifier.height(24.dp))
             PrimaryButton(
                 "Satz speichern 🔥",
                 onClick = { onSave(weight, reps.toInt()) },
                 modifier = Modifier.fillMaxWidth(),
-                enabled = reps >= 1,
+                enabled = weightOk && repsOk && reps >= 1,
             )
         }
     }
@@ -167,6 +171,8 @@ fun PlanItemDialog(
     var exerciseId by remember { mutableStateOf(initial.exerciseId) }
     var sets by remember { mutableStateOf(initial.sets.toDouble()) }
     var weight by remember { mutableStateOf(initial.weightKg) }
+    var setsOk by remember { mutableStateOf(true) }
+    var weightOk by remember { mutableStateOf(true) }
     val selected = exercises.find { it.id == exerciseId }
 
     AlertDialog(
@@ -188,18 +194,19 @@ fun PlanItemDialog(
                     }
                 }
                 Spacer(Modifier.height(16.dp))
-                NumberStepper("Sätze", sets, { sets = it }, step = 1.0, unit = "", min = 1.0)
+                NumberStepper("Sätze", sets, { sets = it }, step = 1.0, unit = "", min = 1.0, onValidityChange = { setsOk = it })
                 Spacer(Modifier.height(12.dp))
                 NumberStepper(
                     if (selected?.bodyweight == true) "Zusatzgewicht" else "Gewicht",
                     weight, { weight = it },
                     step = 2.5, unit = "kg", decimals = true,
+                    onValidityChange = { weightOk = it },
                 )
             }
         },
         confirmButton = {
             TextButton(
-                enabled = selected != null,
+                enabled = selected != null && setsOk && weightOk,
                 onClick = {
                     onSave(initial.copy(exerciseId = exerciseId, sets = sets.toInt(), weightKg = weight))
                 },

@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import com.fheicode.mofit.data.AppData
 import com.fheicode.mofit.data.Exercise
 import com.fheicode.mofit.data.MoFitRepository
+import com.fheicode.mofit.data.PlanAdoption
 import com.fheicode.mofit.data.PlanItem
 import com.fheicode.mofit.data.Stats
 import com.fheicode.mofit.ui.components.LogSetSheet
@@ -47,11 +48,14 @@ fun LogSetHost(
         onSave = { weight, reps ->
             val record = Stats.isNewRecord(data.logs, exercise, weight, reps)
             repository.logSet(exercise.id, weight, reps)
-            onClose()
-            onMessage(
-                if (record) "🏆 Neuer Rekord bei ${exercise.name}: ${setLabel(weight, reps)}!"
-                else "💪 ${exercise.name}: ${setLabel(weight, reps)} gespeichert"
+            val raised = PlanAdoption.raisedPlanItem(
+                data.plan, exercise.id, java.time.LocalDate.now().dayOfWeek.value, weight,
             )
+            raised?.let(repository::savePlanItem)
+            onClose()
+            val base = if (record) "🏆 Neuer Rekord bei ${exercise.name}: ${setLabel(weight, reps)}!"
+            else "💪 ${exercise.name}: ${setLabel(weight, reps)} gespeichert"
+            onMessage(if (raised != null) "$base – Plan jetzt ${formatKg(weight)} kg ⬆️" else base)
         },
     )
 }

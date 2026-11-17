@@ -46,4 +46,31 @@ class PlanAdoptionTest {
         assertEquals(1, entries.count { it.exerciseId == "squat" })
         assertEquals(3, entries.count { it.exerciseId == "pullup" && it.weightKg == 0.0 })
     }
+
+    @Test
+    fun heavierSet_raisesTodaysPlanEntryOnly() {
+        val mon = plan("bench", 3, 30.0).copy(dayOfWeek = 1)
+        val fri = plan("bench", 3, 32.5).copy(dayOfWeek = 5)
+        val raised = PlanAdoption.raisedPlanItem(listOf(mon, fri), "bench", 1, 35.0)!!
+        assertEquals(mon.id, raised.id)
+        assertEquals(35.0, raised.weightKg, 0.0)
+    }
+
+    @Test
+    fun lighterOrSameSet_orNotPlannedToday_changesNothing() {
+        val mon = plan("bench", 3, 30.0).copy(dayOfWeek = 1)
+        assertEquals(null, PlanAdoption.raisedPlanItem(listOf(mon), "bench", 1, 30.0))
+        assertEquals(null, PlanAdoption.raisedPlanItem(listOf(mon), "bench", 1, 25.0))
+        assertEquals(null, PlanAdoption.raisedPlanItem(listOf(mon), "bench", 3, 40.0))
+        assertEquals(null, PlanAdoption.raisedPlanItem(listOf(mon), "squat", 1, 40.0))
+    }
+
+    /** The reported problem: + with more weight, then ✓ next week must not go back down. */
+    @Test
+    fun adoptAfterHeavierSet_keepsTheHigherWeight() {
+        val mon = plan("bench", 3, 30.0).copy(dayOfWeek = 1)
+        val raised = PlanAdoption.raisedPlanItem(listOf(mon), "bench", 1, 35.0)!!
+        val nextWeek = PlanAdoption.entriesFor(listOf(raised), emptyList(), today + 7)
+        assertTrue(nextWeek.all { it.weightKg == 35.0 })
+    }
 }

@@ -28,6 +28,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -159,8 +160,20 @@ fun NumberStepper(
     modifier: Modifier = Modifier,
     min: Double = 0.0,
     decimals: Boolean = false,
+    onValidityChange: (Boolean) -> Unit = {},
 ) {
-    var text by remember(value) { mutableStateOf(formatKg(value)) }
+    // Review fix: the field used to be re-created from `value` on every change, which
+    // swallowed a just-typed comma (deleting "32,5" to "32," jumped to "32"), and input
+    // that could not be used (empty, "0" reps, "8,5" reps) stayed visible while the old
+    // number was saved. Now the typed text is kept, invalid text is marked red and
+    // reported, and only the ± buttons or a new value from outside overwrite it.
+    var text by remember { mutableStateOf(formatKg(value)) }
+    val parsed = parseDecimal(text)
+    val valid = parsed != null && parsed >= min && (decimals || parsed % 1.0 == 0.0)
+    LaunchedEffect(value) {
+        if (parseDecimal(text) != value) text = formatKg(value)
+    }
+    LaunchedEffect(valid) { onValidityChange(valid) }
     Column(modifier) {
         Text(label.uppercase(), style = MaterialTheme.typography.labelSmall, color = MoFitColors.TextSecondary)
         Spacer(Modifier.height(6.dp))
@@ -170,7 +183,7 @@ fun NumberStepper(
                 contentColor = MoFitColors.Lime,
             )
             FilledTonalIconButton(
-                onClick = { onValueChange(maxOf(min, value - step)) },
+                onClick = { onValueChange(maxOf(min, (parsed ?: value) - step)) },
                 colors = buttonColors,
                 modifier = Modifier.size(52.dp),
             ) { Icon(Icons.Rounded.Remove, contentDescription = "weniger") }
@@ -178,11 +191,12 @@ fun NumberStepper(
                 value = text,
                 onValueChange = { input ->
                     text = input
-                    val parsed = parseDecimal(input)
-                    if (parsed != null && parsed >= min) {
-                        onValueChange(if (decimals) parsed else parsed.toLong().toDouble())
+                    val number = parseDecimal(input)
+                    if (number != null && number >= min && (decimals || number % 1.0 == 0.0)) {
+                        onValueChange(number)
                     }
                 },
+                isError = !valid,
                 singleLine = true,
                 suffix = { Text(unit, color = MoFitColors.TextSecondary) },
                 keyboardOptions = KeyboardOptions(
@@ -202,7 +216,7 @@ fun NumberStepper(
                     .padding(horizontal = 8.dp),
             )
             FilledTonalIconButton(
-                onClick = { onValueChange(value + step) },
+                onClick = { onValueChange(maxOf(min, (parsed ?: value) + step)) },
                 colors = buttonColors,
                 modifier = Modifier.size(52.dp),
             ) { Icon(Icons.Rounded.Add, contentDescription = "mehr") }

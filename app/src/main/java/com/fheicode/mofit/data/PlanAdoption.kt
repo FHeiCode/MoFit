@@ -19,6 +19,19 @@ object PlanAdoption {
         return (item.sets - done).coerceAtLeast(0)
     }
 
+    /**
+     * Review fix: "✓" logs the planned weight. If a heavier set was entered by hand,
+     * the plan kept the old weight, so the next "✓" logged the old weight again and
+     * the progress curve dropped back. Now a heavier set raises the plan entry for
+     * that weekday. Lighter sets (a bad day) leave the plan unchanged.
+     *
+     * Returns the plan entry to save, or null if nothing changes.
+     */
+    fun raisedPlanItem(plan: List<PlanItem>, exerciseId: String, dayOfWeek: Int, weightKg: Double): PlanItem? =
+        plan.firstOrNull { it.exerciseId == exerciseId && it.dayOfWeek == dayOfWeek }
+            ?.takeIf { weightKg > it.weightKg }
+            ?.copy(weightKg = weightKg)
+
     /** The sets needed to complete the given plan entries today. */
     fun entriesFor(items: List<PlanItem>, logs: List<SetLog>, todayEpochDay: Long): List<SetEntry> {
         val result = mutableListOf<SetEntry>()
