@@ -7,6 +7,7 @@ data class DayStat(
     val maxReps: Int,
     val volume: Double,
     val sets: Int,
+    val totalReps: Int,
 )
 
 object Stats {
@@ -22,6 +23,7 @@ object Stats {
                     maxReps = sets.maxOf { it.reps },
                     volume = sets.sumOf { it.weightKg * it.reps },
                     sets = sets.size,
+                    totalReps = sets.sumOf { it.reps },
                 )
             }
             .sortedBy { it.epochDay }

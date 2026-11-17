@@ -43,6 +43,7 @@ import com.fheicode.mofit.ui.LogSetHost
 import com.fheicode.mofit.ui.components.EmptyHint
 import com.fheicode.mofit.ui.components.ExerciseAvatar
 import com.fheicode.mofit.ui.components.GradientCard
+import com.fheicode.mofit.ui.components.ChartPoint
 import com.fheicode.mofit.ui.components.LineChart
 import com.fheicode.mofit.ui.components.MoCard
 import com.fheicode.mofit.ui.components.ScreenHeader
@@ -55,10 +56,24 @@ import com.fheicode.mofit.ui.setLabel
 import com.fheicode.mofit.ui.theme.MoFitColors
 import java.time.LocalDate
 
-private enum class Metric(val label: String, val unit: String) {
-    WEIGHT("Gewicht", "kg"),
-    REPS("Wdh", "Wdh"),
-    VOLUME("Volumen", "kg"),
+private enum class Metric {
+    WEIGHT, REPS, VOLUME;
+
+    // Review fix: "Volumen" (kg × Wdh) is always 0 for bodyweight exercises without
+    // extra weight, so for those it shows the total reps of the day instead.
+    fun label(bodyweight: Boolean) = when (this) {
+        WEIGHT -> if (bodyweight) "Zusatzgewicht" else "Gewicht"
+        REPS -> "Wdh"
+        VOLUME -> if (bodyweight) "Wdh gesamt" else "Volumen"
+    }
+
+    fun unit(bodyweight: Boolean) = when (this) {
+        WEIGHT -> "kg"
+        REPS -> "Wdh"
+        VOLUME -> if (bodyweight) "Wdh" else "kg"
+    }
+
+    fun integer(bodyweight: Boolean) = this == REPS || (this == VOLUME && bodyweight)
 }
 
 @Composable
@@ -231,20 +246,25 @@ private fun ChartCard(
     color: Color,
 ) {
     var metric by rememberSaveable(exerciseId) { mutableStateOf(if (bodyweight) Metric.REPS else Metric.WEIGHT) }
-    val values = daily.map {
-        when (metric) {
-            Metric.WEIGHT -> it.maxWeight.toFloat()
-            Metric.REPS -> it.maxReps.toFloat()
-            Metric.VOLUME -> it.volume.toFloat()
-        }
+    val points = daily.map {
+        ChartPoint(
+            epochDay = it.epochDay,
+            value = when (metric) {
+                Metric.WEIGHT -> it.maxWeight
+                Metric.REPS -> it.maxReps.toDouble()
+                Metric.VOLUME -> if (bodyweight) it.totalReps.toDouble() else it.volume
+            },
+        )
     }
+    val values = points.map { it.value }
+    val unit = metric.unit(bodyweight)
     MoCard(Modifier.fillMaxWidth()) {
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             Metric.entries.forEach { m ->
                 FilterChip(
                     selected = m == metric,
                     onClick = { metric = m },
-                    label = { Text(m.label) },
+                    label = { Text(m.label(bodyweight)) },
                     colors = FilterChipDefaults.filterChipColors(
                         selectedContainerColor = color,
                         selectedLabelColor = Color.Black,
@@ -257,33 +277,38 @@ private fun ChartCard(
         Spacer(Modifier.height(8.dp))
         Row {
             Text(
-                "max ${formatKg(values.max().toDouble())} ${metric.unit}",
+                "max ${formatKg(values.max())} $unit",
                 style = MaterialTheme.typography.labelMedium,
                 color = color,
                 modifier = Modifier.weight(1f),
             )
             Text(
-                "zuletzt ${formatKg(values.last().toDouble())} ${metric.unit}",
+                "zuletzt ${formatKg(values.last())} $unit",
                 style = MaterialTheme.typography.labelMedium,
                 color = MoFitColors.TextSecondary,
             )
         }
         LineChart(
-            values = values,
+            points = points,
             color = color,
+            unit = unit,
+            integer = metric.integer(bodyweight),
             modifier = Modifier
                 .fillMaxWidth()
-                .height(180.dp)
+                .height(200.dp)
                 .padding(vertical = 8.dp),
         )
         Row {
             Text(formatShortDate(daily.first().epochDay), style = MaterialTheme.typography.labelSmall, color = MoFitColors.TextSecondary, modifier = Modifier.weight(1f))
             Text(formatShortDate(daily.last().epochDay), style = MaterialTheme.typography.labelSmall, color = MoFitColors.TextSecondary)
         }
-        if (values.size == 1) {
-            Spacer(Modifier.height(6.dp))
-            Text("Ab dem zweiten Trainingstag siehst du hier eine Kurve.", style = MaterialTheme.typography.bodySmall, color = MoFitColors.TextSecondary)
-        }
+        Spacer(Modifier.height(6.dp))
+        Text(
+            if (values.size == 1) "Ab dem zweiten Trainingstag siehst du hier eine Kurve."
+            else "Ein Punkt pro Trainingstag · antippen für Details",
+            style = MaterialTheme.typography.bodySmall,
+            color = MoFitColors.TextSecondary,
+        )
     }
 }
 
